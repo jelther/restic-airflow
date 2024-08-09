@@ -1,6 +1,7 @@
 [project]
 name = "restic-airflow"
 version = "0.1.0"
+
 description = "Airflow operators to backup and restore data using restic"
 authors = [
     {name = "Jelther Goncalves", email = "hello@jelther.dev"},
