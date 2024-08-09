@@ -1,0 +1,36 @@
+[project]
+name = "restic-airflow"
+version = "0.1.0"
+description = "Airflow operators to backup and restore data using restic"
+authors = [
+    {name = "Jelther Goncalves", email = "hello@jelther.dev"},
+]
+dependencies = [
+    "apache-airflow==2.9.1",
+    "pyyaml>=6.0.1",
+    "loguru>=0.7.2",
+    "apache-airflow-providers-docker>=3.11.0",
+]
+requires-python = ">=3.10,<3.13"
+readme = "README.md"
+license = {text = "The Unlicense"}
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+
+[tool.pdm]
+distribution = true
+
+[tool.pdm.dev-dependencies]
+dev = [
+    "pytest>=8.2.0",
+    "black>=24.4.2",
+    "pytest-env>=1.1.3",
+]
+
+[tool.pytest_env]
+AIRFLOW_HOME = {value = "{PWD}/airflow_home", transform = true}
+AIRFLOW__CORE__UNIT_TEST_MODE=true
+
