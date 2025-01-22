@@ -1,5 +1,11 @@
 # Restic Airflow
 
+[![PyPI version](https://badge.fury.io/py/restic-airflow.svg)](https://badge.fury.io/py/restic-airflow)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/restic-airflow)](https://pypi.org/project/restic-airflow/)
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/restic-airflow)](https://pypi.org/project/restic-airflow/)
+[![License](https://img.shields.io/badge/License-Unlicense-blue.svg)](https://unlicense.org)
+[![Build Status](https://github.com/jelther/restic-airflow/workflows/CI/badge.svg)](https://github.com/jelther/restic-airflow/actions)
+
 ## Introduction
 This repository provides Apache Airflow operators for managing [Restic](https://restic.net/) backups. It allows you to integrate Restic backup operations into your Airflow DAGs using Docker-based operators.
 
