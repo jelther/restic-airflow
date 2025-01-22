@@ -24,18 +24,22 @@ This repository provides Apache Airflow operators for managing [Restic](https://
 ## Usage Example
 
 ```python
+from airflow import DAG
 from restic_airflow.operators.restic import ResticBackupOperator
 
-backup_task = ResticBackupOperator(
-    task_id='backup_data',
-    repository='/path/to/repo',
-    backup_from_path='/data/to/backup',
-    cache_directory='/tmp/restic-cache',
-    tags=['daily', 'important'],
-    password='your-repository-password',
-    hostname='backup-host'
-)
+with DAG('backup_dag', ...) as dag:
+    backup_task = ResticBackupOperator(
+        task_id='backup_data',
+        repository='/path/to/repo',
+        backup_from_path='/data/to/backup',
+        cache_directory='/tmp/restic-cache',
+        tags=['daily'],
+        password='your-repository-password',
+        hostname='backup-host'
+    )
 ```
+
+See [sample.py](sample.py) for a complete DAG example including initialization, backup, health checks, and retention management.
 
 ## Environment Variables
 
