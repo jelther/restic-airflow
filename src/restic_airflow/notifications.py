@@ -3,7 +3,7 @@ from airflow.utils.email import send_email
 from loguru import logger
 
 
-def dag_failure_callback(context):
+def dag_failure_callback(context) -> None:
     try:
         alert_email: str = Variable.get("ALERT_EMAIL", default_var="email")
         subject = f"Restic DAG Failure: {context['dag'].dag_id}"
@@ -20,7 +20,7 @@ def dag_failure_callback(context):
         logger.info("Email sent successfully on failure")
 
 
-def dag_success_callback(context):
+def dag_success_callback(context) -> None:
     try:
         alert_email: str = Variable.get("ALERT_EMAIL", default_var="email")
         subject = f"Restic DAG Success: {context['dag'].dag_id}"
@@ -36,7 +36,7 @@ def dag_success_callback(context):
         logger.info("Email sent successfully on success")
 
 
-def task_failure_callback(context):
+def task_failure_callback(context) -> None:
     try:
         alert_email: str = Variable.get("ALERT_EMAIL", default_var="email")
         subject = f"Restic Task Failure: {context['task_instance'].task_id}, DAG: {context['dag'].dag_id}"
@@ -53,7 +53,7 @@ def task_failure_callback(context):
         logger.info("Email sent successfully on failure")
 
 
-def task_success_callback(context):
+def task_success_callback(context) -> None:
     try:
         alert_email: str = Variable.get("ALERT_EMAIL", default_var="email")
         subject = f"Restic Task Success: {context['task_instance'].task_id}, DAG: {context['dag'].dag_id}"

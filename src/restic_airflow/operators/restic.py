@@ -1,9 +1,9 @@
 import uuid
 from abc import abstractmethod
-from typing import Dict, List
+from typing import Dict, List, Literal, Optional
 
 from airflow.providers.docker.operators.docker import DockerOperator
-from docker.types import Mount
+from docker.types import Mount  # type: ignore
 from loguru import logger
 
 from restic_airflow.helpers import is_unix_path
@@ -27,10 +27,10 @@ class ResticOperator(DockerOperator):
         password: str,
         hostname: str,
         progress_fps_seconds: int = 30,
-        aws_access_key_id: str = None,
-        aws_secret_access_key: str = None,
+        aws_access_key_id: Optional[str] = None,
+        aws_secret_access_key: Optional[str] = None,
         image: str = "restic/restic:latest",
-        auto_remove: str = "success",
+        auto_remove: Literal["never", "success", "force"] = "success",
         # Set to false when using docker-in-docker
         mount_tmp_dir: bool = False,
         *args,
@@ -227,16 +227,16 @@ class ResticForgetAndPruneOperator(ResticOperator):
 
     def _build_command(self) -> str:
 
-        forget_operations = []
+        forget_operations: List[str] = []
         for forget_flag in self.forget_flags:
             forget_operations.append(
                 f"--keep-{forget_flag['operation']} {forget_flag['value']}"
             )
 
-        forget_operations = " ".join(forget_operations)
+        forget_operations_str = " ".join(forget_operations)
 
         forget_command: str = (
-            f"restic forget --host {self.hostname} --repo {self.repository} {forget_operations}"
+            f"restic forget --host {self.hostname} --repo {self.repository} {forget_operations_str}"
         )
         if self.should_prune:
             forget_command += " --prune"
