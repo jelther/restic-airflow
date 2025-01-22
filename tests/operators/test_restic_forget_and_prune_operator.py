@@ -32,12 +32,17 @@ def test_restic_forget_and_prune_is_ok(should_prune, forget_operation):
         progress_fps_seconds=30,
         hostname="hostname",
         should_prune=should_prune,
-        forget_flags=[{"operation": forget_operation, "value": "1"}, {"operation": forget_operation, "value": "1"}],
+        forget_flags=[
+            {"operation": forget_operation, "value": "1"},
+            {"operation": forget_operation, "value": "1"},
+        ],
     )
 
     expected_command = []
     expected_command.append(f"restic cat config --repo repository")
-    expected_command.append(f"restic unlock --repo repository --cache-dir cache_directory")
+    expected_command.append(
+        f"restic unlock --repo repository --cache-dir cache_directory"
+    )
 
     if should_prune:
         expected_command.append(

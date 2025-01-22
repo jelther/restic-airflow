@@ -20,7 +20,9 @@ def test_restic_backup_operator_is_ok():
 
     expected_command = []
     expected_command.append(f"restic cat config --repo repository")
-    expected_command.append(f"restic unlock --repo repository --cache-dir cache_directory")
+    expected_command.append(
+        f"restic unlock --repo repository --cache-dir cache_directory"
+    )
     expected_command.append(
         f"restic backup source_path --repo repository --host hostname --tag tag --tag tag2 --cache-dir cache_directory"
     )

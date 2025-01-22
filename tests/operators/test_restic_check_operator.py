@@ -21,7 +21,9 @@ def test_restic_check_operator_is_ok(cached, read_data, read_data_subset):
     )
 
     check_repository_exists: str = f"restic cat config --repo repository"
-    unlock_repository_command: str = f"restic unlock --repo repository --cache-dir cache_directory"
+    unlock_repository_command: str = (
+        f"restic unlock --repo repository --cache-dir cache_directory"
+    )
 
     check_command: str = "restic check --repo repository"
 
@@ -35,6 +37,8 @@ def test_restic_check_operator_is_ok(cached, read_data, read_data_subset):
 
     check_command += f" --cache-dir cache_directory"
 
-    expected_command = " && ".join([check_repository_exists, unlock_repository_command, check_command])
+    expected_command = " && ".join(
+        [check_repository_exists, unlock_repository_command, check_command]
+    )
 
     assert operator.command == f"-c '{expected_command}'"

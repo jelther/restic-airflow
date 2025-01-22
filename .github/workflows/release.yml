@@ -1,0 +1,53 @@
+name: Publish to PyPI
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  release-to-pypi:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    strategy:
+      matrix:
+        python-version: [ "3.13" ]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Fetch full git history
+      run: git fetch --prune --unshallow
+
+    - name: Install GitVersion
+      uses: gittools/actions/gitversion/setup@v0.10.2
+      with:
+        versionSpec: '5.x'
+
+    - name: Determine version with GitVersion
+      id: gitversion
+      uses: gittools/actions/gitversion/execute@v0
+      with:
+        useConfigFile: true
+
+    - name: Setup PDM
+      uses: pdm-project/setup-pdm@v4
+      with:
+        python-version: "${{ matrix.python-version }}"
+        cache: true
+        cache-dependency-path: |
+          ./pdm.lock
+
+    - name: Update version in pyproject.toml
+      run: |
+        echo "Updating version to ${{ steps.gitversion.outputs.semVer }}"
+        sed -i "s/version = \".*\"/version = \"${{ steps.gitversion.outputs.semVer }}\"/" pyproject.toml
+
+    - name: Build package
+      run: pdm build
+
+    - name: Publish to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1

@@ -17,7 +17,7 @@ def dag_failure_callback(context):
         logger.error(f"Error sending email on failure: {e}")
         raise Exception(f"Error sending email on failure: {e}")
     else:
-        logger.info(f"Email sent successfully on failure")
+        logger.info("Email sent successfully on failure")
 
 
 def dag_success_callback(context):
@@ -33,7 +33,7 @@ def dag_success_callback(context):
         logger.error(f"Error sending email on success: {e}")
         raise Exception(f"Error sending email on failure: {e}")
     else:
-        logger.info(f"Email sent successfully on success")
+        logger.info("Email sent successfully on success")
 
 
 def task_failure_callback(context):
@@ -50,7 +50,7 @@ def task_failure_callback(context):
         logger.error(f"Error sending email on failure: {e}")
         raise Exception(f"Error sending email on failure: {e}")
     else:
-        logger.info(f"Email sent successfully on failure")
+        logger.info("Email sent successfully on failure")
 
 
 def task_success_callback(context):
@@ -66,4 +66,4 @@ def task_success_callback(context):
         logger.error(f"Error sending email on success: {e}")
         raise Exception(f"Error sending email on failure: {e}")
     else:
-        logger.info(f"Email sent successfully on success")
+        logger.info("Email sent successfully on success")

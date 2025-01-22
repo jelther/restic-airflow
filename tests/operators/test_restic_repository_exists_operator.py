@@ -12,4 +12,7 @@ def test_restic_repository_exists_operator_is_ok():
         hostname="hostname",
     )
 
-    assert operator.command == "-c 'restic cat config --repo repository --cache-dir cache_directory'"
+    assert (
+        operator.command
+        == "-c 'restic cat config --repo repository --cache-dir cache_directory'"
+    )

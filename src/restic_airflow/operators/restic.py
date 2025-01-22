@@ -1,6 +1,6 @@
 import uuid
 from abc import abstractmethod
-from typing import List, Dict
+from typing import Dict, List
 
 from airflow.providers.docker.operators.docker import DockerOperator
 from docker.types import Mount
@@ -52,7 +52,9 @@ class ResticOperator(DockerOperator):
 
         env["RESTIC_CACHE_DIR"] = self.cache_directory
         env["RESTIC_TAG"] = " ".join(tags)
-        env["RESTIC_PROGRESS_FPS"] = str(1 / progress_fps_seconds if progress_fps_seconds > 0 else 1 / 30)
+        env["RESTIC_PROGRESS_FPS"] = str(
+            1 / progress_fps_seconds if progress_fps_seconds > 0 else 1 / 30
+        )
         env["RESTIC_HOSTNAME"] = self.hostname
 
         # access keys for AWS S3 or Backblaze B2
@@ -85,7 +87,9 @@ class ResticOperator(DockerOperator):
         return f"restic cat config --repo {self.repository}"
 
     def unlock_repository_command(self) -> str:
-        return f"restic unlock --repo {self.repository} --cache-dir {self.cache_directory}"
+        return (
+            f"restic unlock --repo {self.repository} --cache-dir {self.cache_directory}"
+        )
 
     @abstractmethod
     def _build_command(self) -> str:
@@ -94,13 +98,23 @@ class ResticOperator(DockerOperator):
     def _build_mounts(self) -> list[Mount]:
         # cache is always mounted
         mounts: List[Mount] = [
-            Mount(target=self.cache_directory, source=self.cache_directory, type="bind", read_only=False)
+            Mount(
+                target=self.cache_directory,
+                source=self.cache_directory,
+                type="bind",
+                read_only=False,
+            )
         ]
 
         # if repo is a unix path, mount it
         if is_unix_path(self.repository):
             mounts.append(
-                Mount(target=self.repository, source=self.repository, type="bind", read_only=False),
+                Mount(
+                    target=self.repository,
+                    source=self.repository,
+                    type="bind",
+                    read_only=False,
+                ),
             )
         return mounts
 
@@ -112,7 +126,12 @@ class ResticOperator(DockerOperator):
 class ResticInitOperator(ResticOperator):
 
     def _build_command(self) -> str:
-        return " || ".join([self.check_repository_exists_command(), f"restic init --repo {self.repository}"])
+        return " || ".join(
+            [
+                self.check_repository_exists_command(),
+                f"restic init --repo {self.repository}",
+            ]
+        )
 
     def execute(self, context):
         logger.info(f"Initializing restic repository {self.repository}.")
@@ -129,15 +148,28 @@ class ResticBackupOperator(ResticOperator):
         super().__init__(*args, **kwargs)
 
     def _build_command(self) -> str:
-        backup_command: str = f"restic backup {self.backup_from_path} --repo {self.repository} --host {self.hostname}"
+        backup_command: str = (
+            f"restic backup {self.backup_from_path} --repo {self.repository} --host {self.hostname}"
+        )
         for tag in self.tags:
             backup_command += f" --tag {tag}"
-        return " && ".join([self.check_repository_exists_command(), self.unlock_repository_command(), backup_command])
+        return " && ".join(
+            [
+                self.check_repository_exists_command(),
+                self.unlock_repository_command(),
+                backup_command,
+            ]
+        )
 
     def _build_mounts(self) -> list[Mount]:
         mounts: List[Mount] = super()._build_mounts()  # Get default mounts
         mounts.append(
-            Mount(target=self.backup_from_path, source=self.backup_from_path, type="bind", read_only=True),
+            Mount(
+                target=self.backup_from_path,
+                source=self.backup_from_path,
+                type="bind",
+                read_only=True,
+            ),
         )
         return mounts
 
@@ -169,7 +201,13 @@ class ResticForgetAndPruneOperator(ResticOperator):
         "within-yearly",
     ]
 
-    def __init__(self, forget_flags: List[Dict[str, str]], should_prune: bool = True, *args, **kwargs):
+    def __init__(
+        self,
+        forget_flags: List[Dict[str, str]],
+        should_prune: bool = True,
+        *args,
+        **kwargs,
+    ):
 
         self.should_prune = should_prune
 
@@ -179,7 +217,9 @@ class ResticForgetAndPruneOperator(ResticOperator):
             if "value" not in forget_flag:
                 raise ValueError("forget_flags must contain 'value' key.")
             if forget_flag["operation"] not in self.allowed_forget_operations:
-                raise ValueError(f"forget_flags operation must be one of {self.allowed_forget_operations}.")
+                raise ValueError(
+                    f"forget_flags operation must be one of {self.allowed_forget_operations}."
+                )
 
         self.forget_flags = forget_flags
 
@@ -189,14 +229,24 @@ class ResticForgetAndPruneOperator(ResticOperator):
 
         forget_operations = []
         for forget_flag in self.forget_flags:
-            forget_operations.append(f"--keep-{forget_flag['operation']} {forget_flag['value']}")
+            forget_operations.append(
+                f"--keep-{forget_flag['operation']} {forget_flag['value']}"
+            )
 
         forget_operations = " ".join(forget_operations)
 
-        forget_command: str = f"restic forget --host {self.hostname} --repo {self.repository} {forget_operations}"
+        forget_command: str = (
+            f"restic forget --host {self.hostname} --repo {self.repository} {forget_operations}"
+        )
         if self.should_prune:
-            forget_command += f" --prune"
-        return " && ".join([self.check_repository_exists_command(), self.unlock_repository_command(), forget_command])
+            forget_command += " --prune"
+        return " && ".join(
+            [
+                self.check_repository_exists_command(),
+                self.unlock_repository_command(),
+                forget_command,
+            ]
+        )
 
     def execute(self, context):
         logger.info(f"Forgetting and pruning {self.repository}.")
@@ -210,7 +260,14 @@ class ResticCheckOperator(ResticOperator):
     read_data_subset: str
     cached: bool
 
-    def __init__(self, read_data_subset: str = "", read_data: bool = False, cached: bool = True, *args, **kwargs):
+    def __init__(
+        self,
+        read_data_subset: str = "",
+        read_data: bool = False,
+        cached: bool = True,
+        *args,
+        **kwargs,
+    ):
         self.read_data = read_data
         self.cached = cached
         self.read_data_subset = read_data_subset
@@ -219,12 +276,18 @@ class ResticCheckOperator(ResticOperator):
     def _build_command(self) -> str:
         check_command: str = f"restic check --repo {self.repository}"
         if self.read_data and self.read_data_subset == "":
-            check_command += f" --read-data"
+            check_command += " --read-data"
         elif not self.read_data and self.read_data_subset != "":
             check_command += f" --read-data-subset {self.read_data_subset}"
         if self.cached:
-            check_command += f" --with-cache"
-        return " && ".join([self.check_repository_exists_command(), self.unlock_repository_command(), check_command])
+            check_command += " --with-cache"
+        return " && ".join(
+            [
+                self.check_repository_exists_command(),
+                self.unlock_repository_command(),
+                check_command,
+            ]
+        )
 
     def execute(self, context):
         logger.info(f"Checking {self.repository}.")
