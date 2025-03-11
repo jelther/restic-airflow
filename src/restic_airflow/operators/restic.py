@@ -33,6 +33,7 @@ class ResticOperator(DockerOperator):
         auto_remove: Literal["never", "success", "force"] = "success",
         # Set to false when using docker-in-docker
         mount_tmp_dir: bool = False,
+        environment: Optional[dict] = None,
         *args,
         **kwargs,
     ):
@@ -46,23 +47,23 @@ class ResticOperator(DockerOperator):
         command += f" --cache-dir {self.cache_directory}"
 
         # set RESTIC_PASSWORD environment variable
-        env = kwargs.get("env", {})
-        env["RESTIC_PASSWORD"] = password
-        env["RESTIC_REPOSITORY"] = self.repository
+        merged_env = environment.copy() if environment else {}
+        merged_env["RESTIC_PASSWORD"] = password
+        merged_env["RESTIC_REPOSITORY"] = self.repository
 
-        env["RESTIC_CACHE_DIR"] = self.cache_directory
-        env["RESTIC_TAG"] = " ".join(tags)
-        env["RESTIC_PROGRESS_FPS"] = str(
+        merged_env["RESTIC_CACHE_DIR"] = self.cache_directory
+        merged_env["RESTIC_TAG"] = " ".join(tags)
+        merged_env["RESTIC_PROGRESS_FPS"] = str(
             1 / progress_fps_seconds if progress_fps_seconds > 0 else 1 / 30
         )
-        env["RESTIC_HOSTNAME"] = self.hostname
+        merged_env["RESTIC_HOSTNAME"] = self.hostname
 
         # access keys for AWS S3 or Backblaze B2
         if aws_access_key_id:
-            env["AWS_ACCESS_KEY_ID"] = aws_access_key_id
+            merged_env["AWS_ACCESS_KEY_ID"] = aws_access_key_id
 
         if aws_secret_access_key:
-            env["AWS_SECRET_ACCESS_KEY"] = aws_secret_access_key
+            merged_env["AWS_SECRET_ACCESS_KEY"] = aws_secret_access_key
 
         mounts = self._build_mounts()
 
@@ -76,7 +77,7 @@ class ResticOperator(DockerOperator):
             hostname=hostname,
             auto_remove=auto_remove,
             entrypoint="/bin/sh",
-            environment=env,
+            environment=merged_env,
             mounts=mounts,
             mount_tmp_dir=mount_tmp_dir,
             *args,

@@ -65,3 +65,21 @@ def test_restic_operator_cache_mount():
     assert operator.mounts[0]["Source"] == "cache_directory"
     assert operator.mounts[0]["Type"] == "bind"
     assert operator.mounts[0]["ReadOnly"] is False
+
+
+def test_restic_operator_environment_variables():
+    operator: TestResticOperator = TestResticOperator(
+        task_id="task_id",
+        repository="repository",
+        cache_directory="cache_directory",
+        tags=["tag", "tag2"],
+        password="password",
+        progress_fps_seconds=30,
+        hostname="hostname",
+        environment={"MYKEY": "MYVALUE"},
+    )
+
+    assert operator.environment["RESTIC_PASSWORD"] == "password"
+    assert operator.environment["RESTIC_CACHE_DIR"] == "cache_directory"
+    assert operator.environment["RESTIC_TAG"] == "tag tag2"
+    assert operator.environment["MYKEY"] == "MYVALUE"
